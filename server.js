@@ -19,7 +19,7 @@ app.use(express.urlencoded({ extended: true }))
 app.use(cookieParser())
 
 app.use(cors({
-    origin: 'https://task-master-lac-pi.vercel.app',
+    origin: 'https://taskmaster-dun.vercel.app',
     credentials: true,
 }));
 
