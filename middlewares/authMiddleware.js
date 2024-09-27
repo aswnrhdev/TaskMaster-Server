@@ -4,7 +4,9 @@ import User from "../schemas/userModel.js"
 
 const protect = asyncHandler(async (req, res, next) => {
     
-    let token = req.cookies.userJwt;
+    // let token = req.cookies.userJwt;
+    const authHeader = req.headers['authorization'];
+    const token = authHeader && authHeader.split(' ')[1];
     console.log(token);
 
     if (token) {
