@@ -61,13 +61,18 @@ const createTask = async (req, res) => {
         const userId = req.user._id;
         const { taskName } = req.body;
 
-        if (!taskName) {
-            return res.status(400).json({ success: false, message: "taskName is required" });
+        if (!taskName || taskName.trim() === '') {
+            return res.status(400).json({ success: false, message: "Task name is required and cannot be empty" });
+        }
+
+        const existingTask = await taskModel.findOne({ userId, taskName: taskName.trim() });
+        if (existingTask) {
+            return res.status(400).json({ success: false, message: "A task with this name already exists" });
         }
 
         const newTask = new taskModel({
             userId,
-            taskName,
+            taskName: taskName.trim(),
             status: 'Pending'
         });
 
