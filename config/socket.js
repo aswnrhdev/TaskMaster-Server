@@ -3,7 +3,7 @@ import { Server } from "socket.io";
 export const initializeSocket = (server) => {
     const io = new Server(server, {
         cors: {
-            origin: "https://taskmaster-dun.vercel.app",
+            origin: "https://taskmaster-dun.vercel.app", 
             methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
             credentials: true,
         },
@@ -14,7 +14,7 @@ export const initializeSocket = (server) => {
 
         socket.on("user_login", (userId) => {
             console.log("Socket turned on for user:", userId);
-            socket.join(userId);
+            socket.join(userId); 
         });
 
         socket.on('disconnect', () => {
@@ -22,5 +22,9 @@ export const initializeSocket = (server) => {
         });
     });
 
-    return io;
+    const emitToAllClients = (eventName, data) => {
+        io.emit(eventName, data);
+    };
+
+    return { io, emitToAllClients };
 };
