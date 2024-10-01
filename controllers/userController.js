@@ -78,7 +78,6 @@ const createTask = async (req, res) => {
 
         const savedTask = await newTask.save();
 
-        // Emit only to the user who created the task
         req.io.to(userId.toString()).emit('task_added', savedTask);
 
         res.status(201).json({ success: true, message: "Task created successfully", task: savedTask });
@@ -119,7 +118,6 @@ const updateTask = async (req, res) => {
             return res.status(404).json({ success: false, message: "Task not found or not authorized to update" });
         }
 
-        // Emit only to the user who updated the task
         req.io.to(userId.toString()).emit('task_updated', updatedTask);
 
         res.status(200).json({ success: true, message: "Task updated successfully", task: updatedTask });
@@ -144,7 +142,6 @@ const deleteTask = async (req, res) => {
             return res.status(404).json({ success: false, message: "Task not found or not authorized to delete" });
         }
 
-        // Emit only to the user who deleted the task
         req.io.to(userId.toString()).emit('task_deleted', taskId);
 
         res.status(200).json({ success: true, message: "Task deleted successfully", taskId });
@@ -170,7 +167,6 @@ const updateTaskStatus = async (req, res) => {
             return res.status(404).json({ success: false, message: "Task not found or not authorized to update" });
         }
 
-        // Emit only to the user who updated the task status
         if (status === 'Completed') {
             req.io.to(userId.toString()).emit('task_completed', updatedTask);
         } else {
