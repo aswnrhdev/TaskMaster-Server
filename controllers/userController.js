@@ -56,17 +56,6 @@ const login = async (req, res) => {
 
 
 
-const getTasks = async (req, res) => {
-    try {
-        const userId = req.user._id;
-        const tasks = await taskModel.find({ userId, status: { $ne: "Completed" } });
-        res.status(200).json({ success: true, message: "Tasks retrieved successfully", tasks });
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({ success: false, message: "Failed to retrieve tasks" });
-    }
-};
-
 const createTask = async (req, res) => {
     try {
         const userId = req.user._id;
@@ -84,12 +73,24 @@ const createTask = async (req, res) => {
 
         const savedTask = await newTask.save();
 
-        req.io.emit('task_added', savedTask);
+        // Emit only to the user who created the task
+        req.io.to(userId.toString()).emit('task_added', savedTask);
 
         res.status(201).json({ success: true, message: "Task created successfully", task: savedTask });
     } catch (error) {
         console.error(error);
         res.status(500).json({ success: false, message: "Failed to create task" });
+    }
+};
+
+const getTasks = async (req, res) => {
+    try {
+        const userId = req.user._id;
+        const tasks = await taskModel.find({ userId, status: { $ne: "Completed" } });
+        res.status(200).json({ success: true, message: "Tasks retrieved successfully", tasks });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ success: false, message: "Failed to retrieve tasks" });
     }
 };
 
@@ -113,7 +114,8 @@ const updateTask = async (req, res) => {
             return res.status(404).json({ success: false, message: "Task not found or not authorized to update" });
         }
 
-        req.io.emit('task_updated', updatedTask);
+        // Emit only to the user who updated the task
+        req.io.to(userId.toString()).emit('task_updated', updatedTask);
 
         res.status(200).json({ success: true, message: "Task updated successfully", task: updatedTask });
     } catch (error) {
@@ -137,7 +139,8 @@ const deleteTask = async (req, res) => {
             return res.status(404).json({ success: false, message: "Task not found or not authorized to delete" });
         }
 
-        req.io.emit('task_deleted', taskId);
+        // Emit only to the user who deleted the task
+        req.io.to(userId.toString()).emit('task_deleted', taskId);
 
         res.status(200).json({ success: true, message: "Task deleted successfully", taskId });
     } catch (error) {
@@ -162,10 +165,11 @@ const updateTaskStatus = async (req, res) => {
             return res.status(404).json({ success: false, message: "Task not found or not authorized to update" });
         }
 
+        // Emit only to the user who updated the task status
         if (status === 'Completed') {
-            req.io.emit('task_completed', updatedTask);
+            req.io.to(userId.toString()).emit('task_completed', updatedTask);
         } else {
-            req.io.emit('task_updated', updatedTask);
+            req.io.to(userId.toString()).emit('task_updated', updatedTask);
         }
 
         res.status(200).json({ success: true, message: "Task status updated successfully", task: updatedTask });
